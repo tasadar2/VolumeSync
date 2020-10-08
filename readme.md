@@ -1,4 +1,4 @@
-﻿# VolumeSync
+# VolumeSync
 
 Synchronizes the volume across audio devices.
 
