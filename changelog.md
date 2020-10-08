@@ -14,5 +14,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Volume syncing across audio devices
 - Support for multiple syncing devices
 
-[unreleased]: https://github.com/tasadar2/VolumeSync/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/tasadar2/VolumeSync/releases/tag/v1.0.0
+[unreleased]: https://github.com/tasadar2/VolumeSync/compare/1.0.0...HEAD
+[1.0.0]: https://github.com/tasadar2/VolumeSync/releases/tag/1.0.0
