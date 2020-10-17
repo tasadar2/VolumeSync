@@ -12,7 +12,7 @@ using VolumeSync.Configuration;
 
 namespace VolumeSync
 {
-    public class VolumeSyncService : IHostedService, IObserver<DeviceVolumeChangedArgs>
+    public class VolumeSyncService : IHostedService, IObserver<DeviceVolumeChangedArgs>, IObserver<DeviceMuteChangedArgs>
     {
         private readonly IAudioController<CoreAudioDevice> _audioController;
         private readonly ILogger _logger;
@@ -30,7 +30,12 @@ namespace VolumeSync
         public Task StartAsync(CancellationToken cancellationToken)
         {
             IDevice defaultDevice = null;
-            var secondaryOptions = new List<SecondaryDeviceOptions>(_options.Value.SecondaryDevices);
+            var secondaryOptions = new List<SecondaryDeviceOptions>();
+            if (_options.Value.SecondaryDevices != null)
+            {
+                secondaryOptions.AddRange(_options.Value.SecondaryDevices);
+            }
+
             foreach (var device in _audioController.GetDevices(DeviceType.All, DeviceState.All))
             {
                 if (_primary == null && IsDevice(device, _options.Value.Primary))
@@ -56,6 +61,7 @@ namespace VolumeSync
                         Offset = secondary.Offset ?? VolumeSyncDefaults.Offset,
                     });
                     device.VolumeChanged.Subscribe(this);
+                    device.MuteChanged.Subscribe(this);
                     _logger?.LogInformation($"Found secondary {device.FullName} ({device.Id:D})");
                 }
             }
@@ -68,6 +74,7 @@ namespace VolumeSync
             if (_primary != null && _secondaries.Any())
             {
                 _primary.VolumeChanged.Subscribe(this);
+                _primary.MuteChanged.Subscribe(this);
                 _logger?.LogInformation($"Found primary {_primary.FullName} ({_primary.Id:D})");
                 _logger?.LogInformation("VolumeSync started successfully.");
             }
@@ -103,6 +110,14 @@ namespace VolumeSync
             }
         }
 
+        public void OnNext(DeviceMuteChangedArgs value)
+        {
+            if (value.Device.Id == _primary.Id)
+            {
+                SyncSecondaryMute(value.IsMuted);
+            }
+        }
+
         public void OnError(Exception error)
         { }
 
@@ -129,6 +144,15 @@ namespace VolumeSync
                 var result = Math.Pow(volume + secondary.RateConstant, secondary.Exponent) * secondary.Multiplier + secondary.Offset;
                 _logger?.LogDebug($"Setting secondary volume (({volume} + {secondary.RateConstant}) ^ {secondary.Exponent} * {secondary.Multiplier} + {secondary.Offset}) = {result}");
                 secondary.Device.Volume = result;
+            }
+        }
+
+        private void SyncSecondaryMute(bool mute)
+        {
+            foreach (var secondary in _secondaries)
+            {
+                _logger?.LogDebug($"Setting secondary mute {mute}");
+                secondary.Device.Mute(mute);
             }
         }
     }
