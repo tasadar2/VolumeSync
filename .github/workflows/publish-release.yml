@@ -7,12 +7,14 @@ on:
 jobs:
   build:
     runs-on: windows-2019
+    container: 
+      image: 5.0-nanoserver-20H2
     steps:
     - uses: actions/checkout@v2
-    - name: Setup .NET Core
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 3.1
+#    - name: Setup .NET Core
+#      uses: actions/setup-dotnet@v1
+#      with:
+#        dotnet-version: 3.1
     - name: Install dependencies
       run: dotnet restore
     - name: Build
@@ -42,6 +44,7 @@ jobs:
       uses: mindsers/changelog-reader-action@v2
       with:
         path: changelog.md
+    - continue-on-error: true
     - name: Create release
       id: create_release
       uses: actions/create-release@v1
