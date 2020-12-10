@@ -35,13 +35,13 @@ jobs:
     - name: Attach workspace
       uses: actions/download-artifact@v2
       with:
-        name: my-artifact
-    - name: Get Changelog Entry
+        name: workspace
+    - name: Get changelog entry
       id: changelog_reader
       uses: mindsers/changelog-reader-action@v2
       with:
         path: changelog.md
-    - name: Create Release
+    - name: Create release
       id: create_release
       uses: actions/create-release@v1
       env:
