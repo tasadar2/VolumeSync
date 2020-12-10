@@ -1,4 +1,4 @@
-name: .NET Core
+name: Publish Release
 
 on:
   push:
@@ -6,9 +6,7 @@ on:
 
 jobs:
   build:
-
     runs-on: windows-2019
-
     steps:
     - uses: actions/checkout@v2
     - name: Setup .NET Core
@@ -21,5 +19,34 @@ jobs:
       run: dotnet build --configuration Release --no-restore
     - name: Package
       run: |
-        dotnet publish VolumeSync\VolumeSync.csproj --configuration Release --output dist
+        dotnet publish VolumeSync\VolumeSync.csproj --configuration Release --no-restore --output dist
         Compress-Archive -Path dist -DestinationPath VolumeSync.zip
+    - name: Store workspace
+      uses: actions/upload-artifact@v2
+      with:
+        name: workspace
+        path: |
+          VolumeSync.zip
+          changelog.md
+
+  publish:
+    runs-on: ubuntu-20.04
+    steps:
+    - name: Attach workspace
+      uses: actions/download-artifact@v2
+      with:
+        name: my-artifact
+    - name: Get Changelog Entry
+      id: changelog_reader
+      uses: mindsers/changelog-reader-action@v2
+      with:
+        path: changelog.md
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.changelog_reader.outputs.version }}
+        release_name: Release ${{ steps.changelog_reader.outputs.version }}
+        body: ${{ steps.changelog_reader.outputs.changes }}
