@@ -10,7 +10,8 @@ jobs:
     container: 
       image: 5.0-nanoserver-20H2
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout
+      uses: actions/checkout@v2
 #    - name: Setup .NET Core
 #      uses: actions/setup-dotnet@v1
 #      with:
@@ -44,7 +45,6 @@ jobs:
       uses: mindsers/changelog-reader-action@v2
       with:
         path: changelog.md
-    - continue-on-error: true
     - name: Create release
       id: create_release
       uses: actions/create-release@v1
