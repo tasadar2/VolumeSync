@@ -52,3 +52,12 @@ jobs:
         tag_name: ${{ steps.changelog_reader.outputs.version }}
         release_name: Release ${{ steps.changelog_reader.outputs.version }}
         body: ${{ steps.changelog_reader.outputs.changes }}
+    - name: Upload assets
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: VolumeSync.zip
+        asset_name: VolumeSync.zip
+        asset_content_type: application/zip
